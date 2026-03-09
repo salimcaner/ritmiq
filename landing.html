@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RitmiQ – Müzik Tahmin Oyunu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --g: #1DB954;
+            --g-dim: rgba(29, 185, 84, 0.12);
+            --bg: #080808;
+            --glass: rgba(255, 255, 255, 0.045);
+            --border: rgba(255, 255, 255, 0.08);
+            --txt: #ffffff;
+            --muted: #888;
+        }
+
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--txt);
+            font-family: 'Outfit', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* ── Orbs ── */
+        .orbs {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: 0.28;
+        }
+
+        .o1 {
+            width: 520px;
+            height: 520px;
+            background: #1db954;
+            top: -140px;
+            left: -80px;
+            animation: flt 9s ease-in-out infinite;
+        }
+
+        .o2 {
+            width: 340px;
+            height: 340px;
+            background: #0d6b31;
+            bottom: -60px;
+            right: -60px;
+            animation: flt 9s ease-in-out infinite -4s;
+        }
+
+        @keyframes flt {
+
+            0%,
+            100% {
+                transform: translateY(0)
+            }
+
+            50% {
+                transform: translateY(-28px)
+            }
+        }
+
+        /* ── Nav ── */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 6%;
+            background: rgba(8, 8, 8, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .logo span {
+            color: var(--g);
+        }
+
+        nav a.cta {
+            padding: 9px 22px;
+            background: var(--g);
+            border-radius: 50px;
+            color: #000;
+            font-weight: 700;
+            font-size: 0.875rem;
+            text-decoration: none;
+            transition: filter 0.2s, transform 0.2s;
+        }
+
+        nav a.cta:hover {
+            filter: brightness(1.12);
+            transform: scale(1.04);
+        }
+
+        /* ── Hero ── */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 7rem 6% 4rem;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 5px 15px;
+            border-radius: 50px;
+            margin-bottom: 2rem;
+            background: var(--g-dim);
+            border: 1px solid rgba(29, 185, 84, 0.25);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--g);
+            animation: up 0.6s ease both;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--g);
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: 0.3
+            }
+        }
+
+        h1 {
+            font-size: clamp(2.6rem, 7.5vw, 5.8rem);
+            font-weight: 900;
+            line-height: 1.05;
+            letter-spacing: -2px;
+            margin-bottom: 1.4rem;
+            animation: up 0.65s 0.08s ease both;
+        }
+
+        h1 em {
+            font-style: normal;
+            color: var(--g);
+        }
+
+        h1 .outline {
+            -webkit-text-stroke: 2px var(--g);
+            color: transparent;
+        }
+
+        .sub {
+            max-width: 520px;
+            font-size: clamp(0.95rem, 2.2vw, 1.15rem);
+            color: var(--muted);
+            line-height: 1.65;
+            margin-bottom: 2.5rem;
+            animation: up 0.65s 0.15s ease both;
+        }
+
+        .btns {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+            animation: up 0.65s 0.22s ease both;
+        }
+
+        .btn-p {
+            padding: 14px 36px;
+            background: var(--g);
+            border-radius: 50px;
+            color: #000;
+            font-weight: 700;
+            font-size: 1rem;
+            text-decoration: none;
+            box-shadow: 0 0 28px rgba(29, 185, 84, 0.3);
+            transition: all 0.25s;
+        }
+
+        .btn-p:hover {
+            filter: brightness(1.1);
+            transform: translateY(-3px);
+            box-shadow: 0 0 44px rgba(29, 185, 84, 0.45);
+        }
+
+        .btn-s {
+            padding: 14px 36px;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            backdrop-filter: blur(10px);
+            transition: all 0.25s;
+        }
+
+        .btn-s:hover {
+            background: rgba(255, 255, 255, 0.09);
+            transform: translateY(-3px);
+        }
+
+        @keyframes up {
+            from {
+                opacity: 0;
+                transform: translateY(22px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        /* ── Mock UI ── */
+        .mock-wrap {
+            width: 100%;
+            max-width: 480px;
+            margin-top: 3.5rem;
+            animation: up 0.7s 0.3s ease both;
+        }
+
+        .mock {
+            background: var(--glass);
+            backdrop-filter: blur(18px);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 1.75rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+        }
+
+        .mock-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.2rem;
+        }
+
+        .mock-q {
+            font-size: 0.82rem;
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .waves {
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            height: 16px;
+        }
+
+        .wv {
+            width: 3px;
+            border-radius: 2px;
+            background: var(--g);
+        }
+
+        .wv:nth-child(1) {
+            height: 5px
+        }
+
+        .wv:nth-child(2) {
+            height: 13px
+        }
+
+        .wv:nth-child(3) {
+            height: 16px
+        }
+
+        .wv:nth-child(4) {
+            height: 9px
+        }
+
+        .wv:nth-child(5) {
+            height: 14px
+        }
+
+        .mock-bar {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+
+        .mock-fill {
+            width: 55%;
+            height: 100%;
+            background: var(--g);
+            border-radius: 3px;
+        }
+
+        .mock-time {
+            font-size: 0.68rem;
+            color: var(--muted);
+            text-align: right;
+            margin-bottom: 1.2rem;
+        }
+
+        .mock-opts {
+            display: grid;
+            gap: 9px;
+            margin-bottom: 1.2rem;
+        }
+
+        .mo {
+            padding: 12px 14px;
+            border-radius: 11px;
+            font-size: 0.88rem;
+            border: 1px solid var(--border);
+        }
+
+        .mo.nm {
+            background: rgba(255, 255, 255, 0.05);
+            color: #bbb;
+        }
+
+        .mo.ok {
+            background: rgba(29, 185, 84, 0.18);
+            border-color: var(--g);
+            color: #fff;
+        }
+
+        .mock-dots {
+            display: flex;
+            justify-content: center;
+            gap: 7px;
+        }
+
+        .md {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .md.g {
+            background: var(--g);
+            color: #000;
+        }
+
+        .md.r {
+            background: #ff4d4d;
+            color: #fff;
+        }
+
+        .md.a {
+            border: 2px solid var(--g);
+            color: var(--g);
+        }
+
+        .md.e {
+            background: var(--glass);
+            color: var(--muted);
+            border: 1px solid var(--border);
+        }
+
+        /* ── Divider strip ── */
+        .strip {
+            display: flex;
+            justify-content: center;
+            gap: 4rem;
+            flex-wrap: wrap;
+            padding: 2.5rem 6%;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .st {
+            text-align: center;
+        }
+
+        .st .v {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--g);
+        }
+
+        .st .l {
+            font-size: 0.82rem;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        /* ── Difficulty cards ── */
+        .section {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 4rem 6%;
+        }
+
+        .sec-label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--g);
+            margin-bottom: 0.6rem;
+        }
+
+        .section h2 {
+            font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+            font-weight: 800;
+            margin-bottom: 2.5rem;
+            line-height: 1.2;
+        }
+
+        .diff-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+        }
+
+        @media(max-width:560px) {
+            .diff-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .dcard {
+            padding: 1.6rem 1.4rem;
+            border-radius: 18px;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(14px);
+            transition: transform 0.3s, border-color 0.3s;
+        }
+
+        .dcard:hover {
+            transform: translateY(-6px);
+            border-color: rgba(29, 185, 84, 0.3);
+        }
+
+        .dcard .dlabel {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.6rem;
+        }
+
+        .dcard .dtime {
+            font-size: 2.4rem;
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: 0.3rem;
+        }
+
+        .dcard .dsub {
+            font-size: 0.82rem;
+            color: var(--muted);
+            line-height: 1.45;
+        }
+
+        .easy {
+            --dc: #1DB954;
+        }
+
+        .medium {
+            --dc: #f0a500;
+        }
+
+        .hard {
+            --dc: #ff4d4d;
+        }
+
+        .dcard .dlabel {
+            color: var(--dc);
+        }
+
+        .dcard .dtime {
+            color: var(--dc);
+        }
+
+        /* ── Steps ── */
+        .steps {
+            display: grid;
+            gap: 12px;
+        }
+
+        .step {
+            display: flex;
+            gap: 1.2rem;
+            align-items: flex-start;
+            padding: 1.4rem 1.5rem;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            backdrop-filter: blur(14px);
+            transition: transform 0.25s, border-color 0.25s;
+        }
+
+        .step:hover {
+            transform: translateX(5px);
+            border-color: rgba(29, 185, 84, 0.28);
+        }
+
+        .sn {
+            width: 40px;
+            height: 40px;
+            flex-shrink: 0;
+            border-radius: 12px;
+            background: var(--g-dim);
+            border: 1px solid rgba(29, 185, 84, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--g);
+        }
+
+        .sbody h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .sbody p {
+            font-size: 0.87rem;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        /* ── CTA ── */
+        .cta {
+            text-align: center;
+            padding: 5rem 6%;
+            background: linear-gradient(135deg, rgba(29, 185, 84, 0.07) 0%, transparent 60%);
+            border-top: 1px solid var(--border);
+        }
+
+        .cta h2 {
+            font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+            font-weight: 800;
+            margin-bottom: 0.8rem;
+        }
+
+        .cta p {
+            color: var(--muted);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        /* ── Footer ── */
+        footer {
+            text-align: center;
+            padding: 1.5rem 6%;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 0.8rem;
+        }
+
+        footer b {
+            color: var(--g);
+            font-weight: 600;
+        }
+
+        /* ── Buy Me a Coffee ── */
+        .bmac {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 11px 18px;
+            background: rgba(20, 20, 20, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            color: #fff;
+            text-decoration: none;
+            font-size: 0.82rem;
+            font-weight: 600;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .bmac:hover {
+            transform: translateY(-3px);
+            border-color: rgba(255, 213, 79, 0.4);
+            box-shadow: 0 6px 28px rgba(0, 0, 0, 0.5);
+        }
+
+        .bmac svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="orbs">
+        <div class="orb o1"></div>
+        <div class="orb o2"></div>
+    </div>
+
+    <nav>
+        <div class="logo">Ritmi<span>Q</span></div>
+        <a href="./game.html" class="cta">Oyna</a>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="tag">
+            <div class="dot"></div>Deezer destekli &nbsp;·&nbsp; Kayıt gerekmez
+        </div>
+        <h1>Şarkıyı bil,<br><em>skoru</em> <span class="outline">kır.</span></h1>
+        <p class="sub">Favori sanatçını seç, birkaç saniyelik parçayı dinle — 4 şık arasından doğruyu bul. 10 soruda ne
+            kadar iyi olduğunu gör.</p>
+        <div class="btns">
+            <a href="./game.html" class="btn-p">Oyuna Başla</a>
+            <a href="#nasil" class="btn-s">Nasıl Oynanır?</a>
+        </div>
+
+        <div class="mock-wrap">
+            <div class="mock">
+                <div class="mock-top">
+                    <div class="mock-q">Soru <strong>3</strong> / 10 &nbsp;·&nbsp; The Weeknd</div>
+                    <div class="waves">
+                        <div class="wv"></div>
+                        <div class="wv"></div>
+                        <div class="wv"></div>
+                        <div class="wv"></div>
+                        <div class="wv"></div>
+                    </div>
+                </div>
+                <div class="mock-bar">
+                    <div class="mock-fill"></div>
+                </div>
+                <div class="mock-time">0:03 / 0:05</div>
+                <div class="mock-opts">
+                    <div class="mo nm">Save Your Tears</div>
+                    <div class="mo ok">Blinding Lights</div>
+                    <div class="mo nm">Starboy</div>
+                    <div class="mo nm">Call Out My Name</div>
+                </div>
+                <div class="mock-dots">
+                    <div class="md g">1</div>
+                    <div class="md r">2</div>
+                    <div class="md a">3</div>
+                    <div class="md e">4</div>
+                    <div class="md e">5</div>
+                    <div class="md e">6</div>
+                    <div class="md e">7</div>
+                    <div class="md e">8</div>
+                    <div class="md e">9</div>
+                    <div class="md e">10</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- STRIP -->
+    <div class="strip">
+        <div class="st">
+            <div class="v">10</div>
+            <div class="l">Soru / Oyun</div>
+        </div>
+        <div class="st">
+            <div class="v">3–7<span style="font-size:1.2rem">sn</span></div>
+            <div class="l">Zorluk Bazlı Süre</div>
+        </div>
+        <div class="st">
+            <div class="v">3</div>
+            <div class="l">Zorluk Seviyesi</div>
+        </div>
+        <div class="st">
+            <div class="v">∞</div>
+            <div class="l">Sanatçı Seçeneği</div>
+        </div>
+    </div>
+
+    <!-- DIFFICULTY -->
+    <div class="section">
+        <div class="sec-label">Zorluk Seviyeleri</div>
+        <h2>Ne kadar süre dinleyeceğini sen seç</h2>
+        <div class="diff-grid">
+            <div class="dcard easy">
+                <div class="dlabel">Kolay</div>
+                <div class="dtime">7<span style="font-size:1.4rem">sn</span></div>
+                <div class="dsub">Sanatçının en popüler şarkıları. Tanıması kolay.</div>
+            </div>
+            <div class="dcard medium">
+                <div class="dlabel">Orta</div>
+                <div class="dtime">5<span style="font-size:1.4rem">sn</span></div>
+                <div class="dsub">Orta bilinirlik, orta süre. Dengenin tam ortası.</div>
+            </div>
+            <div class="dcard hard">
+                <div class="dlabel">Zor</div>
+                <div class="dtime">3<span style="font-size:1.4rem">sn</span></div>
+                <div class="dsub">Nadir şarkılar, 3 saniyelik ipucu. Gerçek hayranlar için.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HOW TO PLAY -->
+    <div id="nasil" class="section">
+        <div class="sec-label">Nasıl Oynanır?</div>
+        <h2>Dört adımda başla</h2>
+        <div class="steps">
+            <div class="step">
+                <div class="sn">1</div>
+                <div class="sbody">
+                    <h3>Sanatçını Ara</h3>
+                    <p>Arama kutusuna bir sanatçı adı yaz ve listeden seç.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="sn">2</div>
+                <div class="sbody">
+                    <h3>Zorluk Seç</h3>
+                    <p>Kolay, Orta veya Zor — dinleme süresini belirler.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="sn">3</div>
+                <div class="sbody">
+                    <h3>Şarkıyı Dinle ve Tahmin Et</h3>
+                    <p>Kısa bir parça çalınır. 4 şık arasından doğru şarkı adını seç.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="sn">4</div>
+                <div class="sbody">
+                    <h3>Sonuçlarına Bak</h3>
+                    <p>10 sorunun ardından kaç doğru yaptığını ve her cevabın detayını gör.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta">
+        <h2>Başlamaya hazır mısın?</h2>
+        <p>Sanatçını seç ve müzik bilgini sına.</p>
+        <a href="./game.html" class="btn-p" style="display:inline-block">Oyuna Başla</a>
+    </div>
+
+    <footer
+        style="margin-top: 3rem; padding: 2rem 6%; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.75rem; text-align: center; line-height: 1.6; opacity: 0.8;">
+        <b>RitmiQ &copy; 2026 Tüm Hakları Saklıdır.</b> Bu web sitesi, hiçbir şarkı veya ses dosyasını sunucularında
+        barındırmaz. Müzik önizlemeleri, sanatçı bilgileri ve albüm kapakları, telif hakkı sahiplerinin belirlediği
+        kurallar çerçevesinde Deezer API aracılığıyla anlık olarak çekilmektedir. Bu proje yalnızca eğlence ve eğitim
+        amaçlıdır; ticari bir gelir elde edilmemektedir. İçeriklerin telif hakkı ilgili plak şirketlerine veya
+        sanatçılara aittir. Hak ihlali olduğunu düşünüyorsanız, lütfen iletişime geçiniz.
+    </footer>
+
+    <!-- Buy Me a Coffee -->
+    <a href="https://www.buymeacoffee.com/salimcaner" target="_blank" rel="noopener" class="bmac">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 8h1a4 4 0 0 1 0 8h-1" stroke="#FFD54F" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
+            <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" stroke="#FFD54F" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" />
+            <line x1="6" y1="1" x2="6" y2="4" stroke="#FFD54F" stroke-width="2" stroke-linecap="round" />
+            <line x1="10" y1="1" x2="10" y2="4" stroke="#FFD54F" stroke-width="2" stroke-linecap="round" />
+            <line x1="14" y1="1" x2="14" y2="4" stroke="#FFD54F" stroke-width="2" stroke-linecap="round" />
+        </svg>
+        Kahve Ismarla
+    </a>
+
+</body>
+
+</html>

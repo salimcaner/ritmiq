@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RitmiQ - 10 Soruluk Müzik Quizi</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="background-glow"></div>
+
+    <main class="container">
+        <header>
+            <h1>Ritmi<span>Q</span></h1>
+            <p>Sanatçıyı seç, 10 şarkıyı tahmin et!</p>
+        </header>
+
+        <!-- Kurulum Ekranı -->
+        <section id="setup-screen" class="glass-card">
+            <div class="input-group">
+                <label for="artist-search">Sanatçı Ara</label>
+                <div class="search-box">
+                    <input type="text" id="artist-search" placeholder="Örn: The Weeknd, Tarkan..." autocomplete="off">
+                    <div id="search-results" class="results-dropdown hidden"></div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Zorluk Seviyesi</label>
+                <div class="difficulty-selector">
+                    <button class="diff-btn active" data-level="easy">Kolay</button>
+                    <button class="diff-btn" data-level="medium">Orta</button>
+                    <button class="diff-btn" data-level="hard">Zor</button>
+                </div>
+            </div>
+
+            <button id="start-game" class="primary-btn" disabled>Oyunu Başlat</button>
+        </section>
+
+        <!-- Oyun Ekranı -->
+        <section id="game-screen" class="glass-card hidden">
+            <div class="quiz-header">
+                <div class="question-counter">
+                    Soru <span id="current-q">1</span> / <span id="total-q">10</span>
+                </div>
+                <div class="playing-indicator">
+                    <div class="wave-container">
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                    </div>
+                    <span id="game-status-text">Dinle ve bil!</span>
+                </div>
+            </div>
+
+            <div class="audio-visualizer">
+                <div class="progress-bar-container">
+                    <div id="playback-progress" class="progress-bar"></div>
+                </div>
+                <div class="time-info">0:00 / 0:05</div>
+            </div>
+
+            <div id="options-container" class="options-grid"></div>
+
+            <!-- Soru göstergesi (1..10) -->
+            <div id="question-tracker" class="question-tracker"></div>
+
+            <button id="next-btn" class="primary-btn hidden" style="margin-top:1.2rem;">
+                Sonraki Soru →
+            </button>
+        </section>
+
+        <!-- Sonuç Ekranı -->
+        <section id="result-screen" class="glass-card hidden">
+            <div class="result-hero">
+                <div class="result-emoji" id="result-emoji">🏆</div>
+                <h2 id="result-title">Mükemmel!</h2>
+                <p id="result-subtitle"></p>
+            </div>
+
+            <div class="score-display">
+                <div class="score-box correct-box">
+                    <span id="correct-count">0</span>
+                    <label>Doğru</label>
+                </div>
+                <div class="score-box wrong-box">
+                    <span id="wrong-count">0</span>
+                    <label>Yanlış</label>
+                </div>
+            </div>
+
+            <!-- Cevap özeti -->
+            <div id="answer-summary" class="answer-summary"></div>
+
+            <button id="play-again" class="primary-btn" style="margin-top:1.5rem;">Yeni Oyun</button>
+        </section>
+    </main>
+
+    <audio id="audio-player"></audio>
+    <script src="script.js"></script>
+</body>
+
+</html>
