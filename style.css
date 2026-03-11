@@ -487,3 +487,68 @@ input[type="text"]:focus {
 .summary-icon {
     flex-shrink: 0;
 }
+
+/* ====== LOADING TRIVIA ====== */
+#loading-trivia {
+    text-align: center;
+    font-size: 0.9rem;
+    font-style: italic;
+    color: var(--text-dim);
+    margin-top: 16px;
+    display: none;
+    letter-spacing: 0.05em;
+}
+
+.fade-anim {
+    animation: fadeInOut 0.75s ease-in-out;
+}
+
+@keyframes fadeInOut {
+    0% {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    20% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    80% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+}
+
+/* ====== REPLAY BUTTON ====== */
+.replay-icon-btn {
+    background: none;
+    border: none;
+    color: var(--primary);
+    cursor: pointer;
+    vertical-align: middle;
+    margin-left: 8px;
+    padding: 6px;
+    border-radius: 50%;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(29, 185, 84, 0.1);
+}
+
+.replay-icon-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.replay-icon-btn:hover {
+    background: rgba(29, 185, 84, 0.25);
+    transform: rotate(-45deg) scale(1.1);
+    box-shadow: 0 0 10px rgba(29, 185, 84, 0.3);
+}

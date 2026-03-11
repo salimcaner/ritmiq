@@ -120,6 +120,37 @@ async function startGame() {
     startBtn.textContent = 'Yükleniyor...';
     startBtn.disabled = true;
 
+    // Loading Trivia Ekle
+    let triviaEl = document.getElementById('loading-trivia');
+    if (!triviaEl) {
+        triviaEl = document.createElement('div');
+        triviaEl.id = 'loading-trivia';
+        startBtn.insertAdjacentElement('afterend', triviaEl);
+    }
+    triviaEl.style.display = 'block';
+
+    const loadingMessages = [
+        "Plaklar tozdan arındırılıyor...",
+        "Sanatçı kulisten çağrılıyor...",
+        "Nota sehpaları düzeltiliyor...",
+        "Deezer arşivi taranıyor...",
+        "Mikrofon kabloları çözülüyor..."
+    ];
+    let msgIndex = 0;
+    triviaEl.textContent = loadingMessages[msgIndex];
+    triviaEl.className = 'fade-anim';
+
+    const triviaInterval = setInterval(() => {
+        msgIndex = (msgIndex + 1) % loadingMessages.length;
+        triviaEl.classList.remove('fade-anim');
+        void triviaEl.offsetWidth; // Trigger reflow
+        triviaEl.textContent = loadingMessages[msgIndex];
+        triviaEl.classList.add('fade-anim');
+    }, 750);
+
+    // Zorunlu 3 saniye bekleme
+    await new Promise(res => setTimeout(res, 3000));
+
     try {
         const res = await fetch(`${API_BASE}/quiz?artist_id=${selectedArtist.id}&difficulty=${selectedDifficulty}&count=10`);
         if (!res.ok) {
@@ -127,6 +158,8 @@ async function startGame() {
             alert(err.detail || 'Oyun başlatılamadı.');
             startBtn.textContent = 'Oyunu Başlat';
             startBtn.disabled = false;
+            clearInterval(triviaInterval);
+            triviaEl.style.display = 'none';
             return;
         }
         const data = await res.json();
@@ -147,6 +180,9 @@ async function startGame() {
         alert('Bağlantı hatası!');
         startBtn.textContent = 'Oyunu Başlat';
         startBtn.disabled = false;
+    } finally {
+        clearInterval(triviaInterval);
+        triviaEl.style.display = 'none';
     }
 }
 
@@ -221,7 +257,18 @@ function startProgress() {
             audioPlayer.pause();
             clearInterval(progressInterval);
             if (gameActive) {
-                statusText.textContent = 'Süre doldu!';
+                statusText.innerHTML = `Süre doldu! <button id="replay-btn" class="replay-icon-btn" title="Tekrar Dinle" style="display: inline-flex; align-items: center; justify-content: center; background: rgba(29, 185, 84, 0.2); border: none; border-radius: 50%; padding: 4px; margin-left: 6px; cursor: pointer; vertical-align: middle;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="1 4 1 10 7 10"></polyline>
+                        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                    </svg>
+                </button>`;
+                document.getElementById('replay-btn').onclick = () => {
+                    statusText.textContent = 'Tekrar dinleniyor...';
+                    audioPlayer.currentTime = 0;
+                    audioPlayer.play().catch(e => console.warn('Replay blocked:', e));
+                    startProgress();
+                };
             }
         }
     }, 80);
@@ -299,6 +346,29 @@ function showResults() {
     document.getElementById('result-emoji').innerHTML = ICONS[iconKey];
     document.getElementById('result-title').textContent = title;
     document.getElementById('result-subtitle').textContent = `${results.length} sorudan ${correctCount} doğru — %${pct}`;
+
+    // AI Evaluation Request
+    const aiEvalEl = document.createElement('p');
+    aiEvalEl.id = 'ai-evaluation';
+    aiEvalEl.style.marginTop = '1rem';
+    aiEvalEl.style.fontStyle = 'italic';
+    aiEvalEl.style.color = '#a855f7';
+    aiEvalEl.textContent = `${selectedArtist.name} müzik zevkini senin için yorumluyor...`;
+
+    // Check if it already exists to prevent duplicates on "Play Again"
+    const existingAi = document.getElementById('ai-evaluation');
+    if (existingAi) existingAi.remove();
+    document.getElementById('result-subtitle').insertAdjacentElement('afterend', aiEvalEl);
+
+    fetch(`${API_BASE}/evaluate?artist_name=${encodeURIComponent(selectedArtist.name)}&correct_count=${correctCount}&total_count=${results.length}`)
+        .then(res => res.json())
+        .then(data => {
+            aiEvalEl.textContent = data.message;
+        })
+        .catch(err => {
+            console.error('AI Eval Error:', err);
+            aiEvalEl.textContent = 'Yapay zeka şu an dinleniyor, ama skorunu biz de çok beğendik! (Bağlantı hatası)';
+        });
 
     // Cevap özeti
     const summaryEl = document.getElementById('answer-summary');
