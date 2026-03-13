@@ -21,7 +21,7 @@ async def evaluate_quiz_score(correct_count: int, total_count: int, artist_name:
         f"asla üçüncü tekil şahıs (örneğin '{artist_name} şöyle yaptı') kullanma. "
         f"Bir hayranın benim (yani senin) şarkılarımdan oluşan bir testte {total_count} sorudan {correct_count} tanesini bildi. "
         f"Şimdi bu hayranına doğrudan hitap et. Kendi ağzından, kendi karakteristik üslubunla ve şarkı sözlerinden esinlenerek "
-        f"en fazla 2 cümlelik Türkçe bir mesaj yaz. "
+        f"1 cümlelik Türkçe bir mesaj yaz. "
         f"Eğer {correct_count} düşükse ('Benim şarkılarımı nasıl bilemezsin' edasıyla) iğneleyici ve alaycı ol. "
         f"Eğer yüksekse çılgınca öv. Cümleye doğrudan bir tepkiyle başla."
     )

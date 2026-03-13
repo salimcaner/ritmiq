@@ -5,6 +5,7 @@ let questions = [];
 let currentIndex = 0;
 let results = []; // {correct: bool, trackName: string, userAnswer: string}
 let gameActive = false;
+let currentArtistNote = null;
 
 // Zorluk bazlı dinleme süresi (saniye)
 function getPlayDuration() {
@@ -347,28 +348,129 @@ function showResults() {
     document.getElementById('result-title').textContent = title;
     document.getElementById('result-subtitle').textContent = `${results.length} sorudan ${correctCount} doğru — %${pct}`;
 
-    // AI Evaluation Request
-    const aiEvalEl = document.createElement('p');
-    aiEvalEl.id = 'ai-evaluation';
-    aiEvalEl.style.marginTop = '1rem';
-    aiEvalEl.style.fontStyle = 'italic';
-    aiEvalEl.style.color = '#a855f7';
-    aiEvalEl.textContent = `${selectedArtist.name} müzik zevkini senin için yorumluyor...`;
+    // Sanatçının notunu oku butonu
+    const showNoteBtn = document.getElementById('show-note-btn');
+    // Eğer buton disabled kaldıysa aktif hale getirelim (yeni oyun case'i için)
+    showNoteBtn.disabled = false;
+    
+    showNoteBtn.onclick = () => {
+        showNoteBtn.disabled = true;
+        
+        // Spotlight Overlay & Floating Note (AI Evaluation)
+        const existingOverlay = document.getElementById('note-overlay');
+        if (existingOverlay) existingOverlay.remove();
 
-    // Check if it already exists to prevent duplicates on "Play Again"
-    const existingAi = document.getElementById('ai-evaluation');
-    if (existingAi) existingAi.remove();
-    document.getElementById('result-subtitle').insertAdjacentElement('afterend', aiEvalEl);
+        const overlay = document.createElement('div');
+        overlay.id = 'note-overlay';
+        overlay.className = 'spotlight-overlay';
+        
+        // Geçici Spotlight Text
+        const spotlightText = document.createElement('div');
+        spotlightText.className = 'spotlight-text';
+        spotlightText.innerHTML = `✨ ${selectedArtist.name} stüdyodan sana bir not iletiyor...`;
+        
+        overlay.appendChild(spotlightText);
+        document.body.appendChild(overlay);
 
-    fetch(`${API_BASE}/evaluate?artist_name=${encodeURIComponent(selectedArtist.name)}&correct_count=${correctCount}&total_count=${results.length}`)
-        .then(res => res.json())
-        .then(data => {
-            aiEvalEl.textContent = data.message;
-        })
-        .catch(err => {
-            console.error('AI Eval Error:', err);
-            aiEvalEl.textContent = 'Yapay zeka şu an dinleniyor, ama skorunu biz de çok beğendik! (Bağlantı hatası)';
-        });
+        // Hemen overlay'i görünür yap (Fade-in Spotlight)
+        setTimeout(() => overlay.classList.add('visible'), 50);
+
+        // Organik El Yazısı Efekti (Mürekkep)
+        function handwritingEffect(text, element) {
+            element.innerHTML = ''; // Temizle
+            
+            // Cümleyi kelimelere böl (boşluklardan)
+            const words = text.split(' ');
+            
+            words.forEach((word, index) => {
+                // Her kelime için kırılmayı önleyen ana span oluştur
+                const wordSpan = document.createElement('span');
+                wordSpan.className = 'ink-word';
+                
+                // Kelimenin her harfi için ink-letter span'i ekle
+                const chars = word.split('');
+                chars.forEach(char => {
+                    const letterSpan = document.createElement('span');
+                    letterSpan.className = 'ink-letter';
+                    letterSpan.textContent = char;
+                    wordSpan.appendChild(letterSpan);
+                });
+                
+                element.appendChild(wordSpan);
+                
+                // Son kelime değilse araya normal boşluk karakteri ekle
+                if (index < words.length - 1) {
+                    element.appendChild(document.createTextNode(' '));
+                }
+            });
+
+            const letterSpans = element.querySelectorAll('.ink-letter');
+            let i = 0;
+            
+            // Akıcı animasyon için recursive setTimeout
+            function pourInk() {
+                if (i < letterSpans.length) {
+                    letterSpans[i].classList.add('visible');
+                    i++;
+                    setTimeout(pourInk, 30); // Ne kadar küçük olursa o kadar hızlı ve su gibi akar
+                }
+            }
+            
+            // Küçük bir gecikme ile efekt başlasın
+            setTimeout(pourInk, 100);
+        }
+
+        // Modal İçeriğini Oluşturma Fonksiyonu
+        const renderModal = (message) => {
+            overlay.innerHTML = `
+                <div class="note-card" id="note-card-el" style="display: none;">
+                    <button class="note-close-btn" id="note-close-btn">&times;</button>
+                    <div class="note-title">${selectedArtist.name} SANA BİR NOT BIRAKTI</div>
+                    <div class="note-text" id="note-text"></div>
+                    <button class="note-close-action-btn" id="note-close-action-btn">Kapat</button>
+                </div>
+            `;
+            
+            const noteCardEl = document.getElementById('note-card-el');
+            const noteTextEl = document.getElementById('note-text');
+            const closeBtn = document.getElementById('note-close-btn');
+            const closeActionBtn = document.getElementById('note-close-action-btn');
+
+            noteCardEl.style.display = 'block';
+
+            const closeHandler = () => {
+                overlay.classList.remove('visible');
+                setTimeout(() => overlay.remove(), 500); // Wait for transition
+                showNoteBtn.disabled = false;
+            };
+
+            closeBtn.onclick = closeHandler;
+            closeActionBtn.onclick = closeHandler;
+
+            setTimeout(() => handwritingEffect(message, noteTextEl), 400);
+        };
+
+        // Cache kontrolü
+        if (currentArtistNote) {
+            // Önceden bir not var ise direkt render et
+            renderModal(currentArtistNote);
+        } else {
+            // AI Değerlendirmesini Getir
+            fetch(`${API_BASE}/evaluate?artist_name=${encodeURIComponent(selectedArtist.name)}&correct_count=${correctCount}&total_count=${results.length}`)
+                .then(res => res.json())
+                .then(data => {
+                    currentArtistNote = data.message; // Gelen notu cache'e kaydet
+                    renderModal(data.message);
+                })
+                .catch(err => {
+                    console.error('AI Eval Error:', err);
+                    // Hata durumunda kapatıyoruz
+                    overlay.classList.remove('visible');
+                    setTimeout(() => overlay.remove(), 500); 
+                    showNoteBtn.disabled = false;
+                });
+        }
+    };
 
     // Cevap özeti
     const summaryEl = document.getElementById('answer-summary');
@@ -395,6 +497,7 @@ playAgainBtn.onclick = () => {
     questions = [];
     results = [];
     currentIndex = 0;
+    currentArtistNote = null;
 };
 
 // =================== LUCKY BUTTON ===================

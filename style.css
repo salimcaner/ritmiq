@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&display=swap');
+
 :root {
     --primary: #1DB954;
     --primary-hover: #1ed760;
@@ -207,6 +209,32 @@ input[type="text"]:focus {
 .primary-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+.secondary-btn {
+    width: 100%;
+    padding: 14px;
+    background: transparent;
+    border: 1px solid var(--primary);
+    border-radius: 12px;
+    color: var(--primary);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+}
+
+.secondary-btn:hover:not(:disabled) {
+    background: rgba(29, 185, 84, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(29, 185, 84, 0.15);
+}
+
+.secondary-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.5);
 }
 
 .hidden {
@@ -452,6 +480,26 @@ input[type="text"]:focus {
     gap: 8px;
     max-height: 260px;
     overflow-y: auto;
+    padding-right: 6px;
+}
+
+/* Custom Scrollbar for Answer Summary */
+.answer-summary::-webkit-scrollbar {
+    width: 6px;
+}
+
+.answer-summary::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 8px;
+}
+
+.answer-summary::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 8px;
+}
+
+.answer-summary::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-hover);
 }
 
 .summary-row {
@@ -465,11 +513,13 @@ input[type="text"]:focus {
 }
 
 .summary-correct {
-    background: rgba(29, 185, 84, 0.08);
+    background: rgba(29, 185, 84, 0.15);
+    border-color: rgba(29, 185, 84, 0.3);
 }
 
 .summary-wrong {
-    background: rgba(255, 77, 77, 0.08);
+    background: rgba(255, 77, 77, 0.15);
+    border-color: rgba(255, 77, 77, 0.3);
 }
 
 .summary-num {
@@ -482,6 +532,9 @@ input[type="text"]:focus {
 
 .summary-track {
     flex: 1;
+    color: #ffffff;
+    font-weight: 500;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .summary-icon {
@@ -551,4 +604,189 @@ input[type="text"]:focus {
     background: rgba(29, 185, 84, 0.25);
     transform: rotate(-45deg) scale(1.1);
     box-shadow: 0 0 10px rgba(29, 185, 84, 0.3);
+}
+
+/* ====== NOTE OVERLAY ====== */
+.note-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+    /* Initially disabled */
+}
+
+.note-overlay.visible {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.note-card {
+    background: rgba(255, 255, 255, 0.05); /* Glass effect */
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    width: 90%;
+    max-width: 440px;
+    padding: 3rem 2.5rem 2.5rem; /* Increased padding */
+    border-radius: 16px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+    position: relative;
+    transform: scale(0.9) rotate(2deg);
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    color: var(--text-main);
+    text-align: center;
+}
+
+.note-overlay.visible .note-card {
+    transform: scale(1) rotate(-1deg);
+}
+
+.note-card::before {
+    content: '';
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 12px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.note-close-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    color: #aaa;
+    transition: color 0.2s;
+}
+
+.note-close-btn:hover {
+    color: #666;
+}
+
+.note-title {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+.note-text {
+    font-family: 'Caveat', cursive;
+    font-size: 2rem;
+    color: var(--text-main);
+    line-height: 1.6; /* Improved line spacing */
+    min-height: 80px;
+    margin-bottom: 2rem;
+}
+
+.note-close-action-btn {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    border: 1px solid var(--primary);
+    border-radius: 12px;
+    color: var(--primary);
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.note-close-action-btn:hover {
+    background: rgba(29, 185, 84, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(29, 185, 84, 0.15);
+}
+
+
+.ink-letter {
+    display: inline-block;
+    opacity: 0;
+    transform: translateX(-4px) rotate(-2deg);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    white-space: pre-wrap;
+    /* Preserve spaces */
+}
+
+.ink-letter.visible {
+    opacity: 1;
+    transform: translateX(0) rotate(0);
+}
+
+.ink-word {
+    display: inline-block;
+    white-space: nowrap;
+}
+
+/* ====== SPOTLIGHT OVERLAY ====== */
+.spotlight-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+}
+
+.spotlight-overlay.visible {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.spotlight-text {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: white;
+    text-shadow: 0 0 15px var(--primary);
+    text-align: center;
+    animation: pulseText 1.5s infinite;
+    padding: 0 20px;
+}
+
+@keyframes pulseText {
+    0% {
+        opacity: 0.6;
+        transform: scale(0.98);
+        text-shadow: 0 0 10px var(--primary);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.02);
+        text-shadow: 0 0 25px var(--primary);
+    }
+
+    100% {
+        opacity: 0.6;
+        transform: scale(0.98);
+        text-shadow: 0 0 10px var(--primary);
+    }
 }
