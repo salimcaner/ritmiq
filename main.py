@@ -51,8 +51,13 @@ async def root():
     return FileResponse("landing.html")
 
 @app.get("/game")
+@app.get("/game.html")
 async def game():
     return FileResponse("game.html")
+
+@app.get("/index.html")
+async def index():
+    return FileResponse("index.html")
 
 # Frontend dosyalarını sun (JS, CSS, vs.)
 app.mount("/public", StaticFiles(directory="public"), name="static")
