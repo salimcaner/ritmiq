@@ -55,7 +55,7 @@ async def game():
     return FileResponse("game.html")
 
 # Frontend dosyalarını sun (JS, CSS, vs.)
-app.mount("/", StaticFiles(directory="."), name="static")
+app.mount("/public", StaticFiles(directory="public"), name="static")
 
 if __name__ == "__main__":
     import uvicorn
