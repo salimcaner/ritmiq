@@ -55,6 +55,16 @@ async def root():
 async def game():
     return FileResponse("game.html")
 
+@app.get("/terms")
+@app.get("/terms.html")
+async def terms():
+    return FileResponse("terms.html")
+
+@app.get("/privacy")
+@app.get("/privacy.html")
+async def privacy():
+    return FileResponse("privacy.html")
+
 @app.get("/index.html")
 async def index():
     return FileResponse("index.html")

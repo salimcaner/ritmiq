@@ -159,6 +159,19 @@
             box-shadow: 0 0 6px rgba(239, 68, 68, 0.4);
         }
     </style>
+    
+    <!-- Google Reader Revenue Manager -->
+    <script async type="application/javascript" src="https://news.google.com/swg/js/v1/swg-basic.js"></script>
+    <script>
+        (self.SWG_BASIC = self.SWG_BASIC || []).push(basicSubscriptions => {
+            basicSubscriptions.init({
+                type: "NewsArticle",
+                isPartOfType: ["Product"],
+                isPartOfProductId: "CAowx9XKDA:openaccess",
+                clientOptions: { theme: "light", lang: "tr" },
+            });
+        });
+    </script>
 </head>
 
 <body>
@@ -264,7 +277,9 @@
     <audio id="audio-player"></audio>
     <script src="/public/script.js?v=4"></script>
 
-    <!-- Buy Me a Coffee -->
+
+
+    <!-- Buy Me a Coffee (Geçici olarak yorum satırında)
     <a href="https://www.buymeacoffee.com/salimcaner" target="_blank" rel="noopener" class="bmac">
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M18 8h1a4 4 0 0 1 0 8h-1" stroke="#FFD54F" stroke-width="2" stroke-linecap="round"
@@ -277,6 +292,7 @@
         </svg>
         Kahve Ismarla
     </a>
+    -->
 </body>
 
 </html>
