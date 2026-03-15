@@ -48,29 +48,29 @@ from fastapi.responses import RedirectResponse, FileResponse
 
 @app.get("/")
 async def root():
-    return FileResponse("landing.html")
+    return FileResponse("templates/landing.html")
 
 @app.get("/game")
 @app.get("/game.html")
 async def game():
-    return FileResponse("game.html")
+    return FileResponse("templates/game.html")
 
 @app.get("/terms")
 @app.get("/terms.html")
 async def terms():
-    return FileResponse("terms.html")
+    return FileResponse("templates/terms.html")
 
 @app.get("/privacy")
 @app.get("/privacy.html")
 async def privacy():
-    return FileResponse("privacy.html")
+    return FileResponse("templates/privacy.html")
 
 @app.get("/index.html")
 async def index():
-    return FileResponse("index.html")
+    return FileResponse("templates/index.html")
 
 # Frontend dosyalarını sun (JS, CSS, vs.)
-app.mount("/public", StaticFiles(directory="public"), name="static")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 if __name__ == "__main__":
     import uvicorn
