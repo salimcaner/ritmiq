@@ -352,10 +352,10 @@ function showResults() {
     const showNoteBtn = document.getElementById('show-note-btn');
     // Eğer buton disabled kaldıysa aktif hale getirelim (yeni oyun case'i için)
     showNoteBtn.disabled = false;
-    
+
     showNoteBtn.onclick = () => {
         showNoteBtn.disabled = true;
-        
+
         // Spotlight Overlay & Floating Note (AI Evaluation)
         const existingOverlay = document.getElementById('note-overlay');
         if (existingOverlay) existingOverlay.remove();
@@ -363,12 +363,12 @@ function showResults() {
         const overlay = document.createElement('div');
         overlay.id = 'note-overlay';
         overlay.className = 'spotlight-overlay';
-        
+
         // Geçici Spotlight Text
         const spotlightText = document.createElement('div');
         spotlightText.className = 'spotlight-text';
         spotlightText.innerHTML = `✨ ${selectedArtist.name} stüdyodan sana bir not iletiyor...`;
-        
+
         overlay.appendChild(spotlightText);
         document.body.appendChild(overlay);
 
@@ -378,15 +378,15 @@ function showResults() {
         // Organik El Yazısı Efekti (Mürekkep)
         function handwritingEffect(text, element) {
             element.innerHTML = ''; // Temizle
-            
+
             // Cümleyi kelimelere böl (boşluklardan)
             const words = text.split(' ');
-            
+
             words.forEach((word, index) => {
                 // Her kelime için kırılmayı önleyen ana span oluştur
                 const wordSpan = document.createElement('span');
                 wordSpan.className = 'ink-word';
-                
+
                 // Kelimenin her harfi için ink-letter span'i ekle
                 const chars = word.split('');
                 chars.forEach(char => {
@@ -395,9 +395,9 @@ function showResults() {
                     letterSpan.textContent = char;
                     wordSpan.appendChild(letterSpan);
                 });
-                
+
                 element.appendChild(wordSpan);
-                
+
                 // Son kelime değilse araya normal boşluk karakteri ekle
                 if (index < words.length - 1) {
                     element.appendChild(document.createTextNode(' '));
@@ -406,7 +406,7 @@ function showResults() {
 
             const letterSpans = element.querySelectorAll('.ink-letter');
             let i = 0;
-            
+
             // Akıcı animasyon için recursive setTimeout
             function pourInk() {
                 if (i < letterSpans.length) {
@@ -415,7 +415,7 @@ function showResults() {
                     setTimeout(pourInk, 30); // Ne kadar küçük olursa o kadar hızlı ve su gibi akar
                 }
             }
-            
+
             // Küçük bir gecikme ile efekt başlasın
             setTimeout(pourInk, 100);
         }
@@ -430,7 +430,7 @@ function showResults() {
                     <button class="note-close-action-btn" id="note-close-action-btn">Kapat</button>
                 </div>
             `;
-            
+
             const noteCardEl = document.getElementById('note-card-el');
             const noteTextEl = document.getElementById('note-text');
             const closeBtn = document.getElementById('note-close-btn');
@@ -466,7 +466,7 @@ function showResults() {
                     console.error('AI Eval Error:', err);
                     // Hata durumunda kapatıyoruz
                     overlay.classList.remove('visible');
-                    setTimeout(() => overlay.remove(), 500); 
+                    setTimeout(() => overlay.remove(), 500);
                     showNoteBtn.disabled = false;
                 });
         }
