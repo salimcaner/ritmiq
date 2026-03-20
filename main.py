@@ -86,15 +86,41 @@ def _daily_lock_key(date_str: str) -> str:
     return f"daily_quiz_lock:{date_str}"
 
 
+def _is_old_cache_format(quiz_data: dict) -> bool:
+    """Eski format: audio_url var, track_id yok (süresi dolan URL'ler)."""
+    questions = quiz_data.get("questions", []) or []
+    if not questions:
+        return False
+    q = questions[0]
+    return bool(q.get("audio_url")) and not q.get("track_id")
+
+
+async def _clear_daily_cache(date_str: str):
+    """Bugünün cache'ini siler (yeniden üretim için)."""
+    if REDIS_CLIENT:
+        await REDIS_CLIENT.delete(_daily_quiz_key(date_str))
+    if DAILY_QUIZ_CACHE["date"] == date_str:
+        DAILY_QUIZ_CACHE["date"] = None
+        DAILY_QUIZ_CACHE["quiz_data"] = None
+
+
 async def _get_daily_quiz(date_str: str):
     if REDIS_CLIENT:
         raw_data = await REDIS_CLIENT.get(_daily_quiz_key(date_str))
         if raw_data:
-            return json.loads(raw_data)
+            data = json.loads(raw_data)
+            if _is_old_cache_format(data):
+                await _clear_daily_cache(date_str)
+                return None
+            return data
         return None
 
     if DAILY_QUIZ_CACHE["date"] == date_str:
-        return DAILY_QUIZ_CACHE["quiz_data"]
+        data = DAILY_QUIZ_CACHE["quiz_data"]
+        if data and _is_old_cache_format(data):
+            await _clear_daily_cache(date_str)
+            return None
+        return data
     return None
 
 
@@ -120,6 +146,61 @@ async def _acquire_generation_lock(date_str: str) -> bool:
 async def _release_generation_lock(date_str: str):
     if REDIS_CLIENT:
         await REDIS_CLIENT.delete(_daily_lock_key(date_str))
+
+
+async def _run_regenerate_then_clear(today_str: str):
+    """Arka planda günlük quiz üretir, bittiğinde flag temizlenir."""
+    try:
+        await generate_and_cache_daily_quiz(today_str)
+    except Exception as e:
+        print(f"Arka plan günlük quiz hatası: {e}")
+        traceback.print_exc()
+    finally:
+        _regn_done.discard(today_str)
+
+
+async def _enrich_daily_quiz_with_previews(quiz_data: dict) -> dict:
+    """Her soru için Deezer'dan güncel preview URL alır, audio_url ekler."""
+    questions = quiz_data.get("questions", [])
+    if not questions:
+        return quiz_data
+
+    track_ids = [q["track_id"] for q in questions if q.get("track_id")]
+    if not track_ids:
+        return quiz_data
+
+    async def fetch_preview(client: httpx.AsyncClient, track_id: int) -> str | None:
+        try:
+            resp = await client.get(f"https://api.deezer.com/track/{track_id}")
+            if resp.status_code == 200:
+                data = resp.json()
+                return data.get("preview")
+        except Exception:
+            pass
+        return None
+
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        previews = await asyncio.gather(*[fetch_preview(client, tid) for tid in track_ids])
+
+    enriched = []
+    idx = 0
+    for q in questions:
+        if q.get("audio_url"):
+            enriched.append(q)
+            continue
+        if q.get("track_id") and idx < len(previews):
+            url = previews[idx]
+            idx += 1
+            if url:
+                q = {**q, "audio_url": url}
+                enriched.append(q)
+            # preview yoksa soruyu atla
+    return {
+        **quiz_data,
+        "questions": enriched,
+        "total": len(enriched),
+    }
+
 
 async def generate_and_cache_daily_quiz(today_str: str):
     print(f"--- {today_str} İÇİN GÜNÜN RİTMİ OLUŞTURULUYOR (Gemini API) ---")
@@ -184,7 +265,7 @@ async def generate_and_cache_daily_quiz(today_str: str):
             
             album = correct_track.get("album", {})
             questions.append({
-                "audio_url": correct_track["preview"],
+                "track_id": correct_track["id"],
                 "options": options,
                 "correct_answer": correct_track["title"],
                 "track_info": {
@@ -204,7 +285,7 @@ async def generate_and_cache_daily_quiz(today_str: str):
             
             album = correct_track.get("album", {})
             questions.append({
-                "audio_url": correct_track["preview"],
+                "track_id": correct_track["id"],
                 "options": options,
                 "correct_answer": correct_track["title"],
                 "track_info": {
@@ -258,14 +339,24 @@ async def daily_quiz_generator_loop():
         await asyncio.sleep(seconds_to_wait)
 
 
+_regn_lock = asyncio.Lock()
+_regn_done = set()
+
+
 @app.get("/api/daily")
 async def get_daily_quiz():
     today_str = datetime.date.today().strftime("%Y%m%d")
     quiz_data = await _get_daily_quiz(today_str)
     if quiz_data:
-        return quiz_data
-    
-    raise HTTPException(status_code=503, detail="Günün Ritmi henüz hazırlanıyor veya servis yoğun, lütfen saniyeler sonra tekrar deneyin...")
+        quiz_data = await _enrich_daily_quiz_with_previews(quiz_data)
+        if quiz_data.get("questions"):
+            return quiz_data
+    # Cache boş veya eski format silindi: arka planda yeniden üret
+    async with _regn_lock:
+        if today_str not in _regn_done:
+            _regn_done.add(today_str)
+            asyncio.create_task(_run_regenerate_then_clear(today_str))
+    raise HTTPException(status_code=503, detail="Günün Ritmi güncelleniyor, lütfen 1-2 dakika sonra tekrar deneyin.")
 
 from fastapi.responses import RedirectResponse, FileResponse
 
