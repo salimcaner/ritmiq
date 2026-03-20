@@ -16,7 +16,7 @@ async def check_deezer_connection():
 async def get_artists_by_query(query: str):
     """Verilen sorguya göre Deezer API'den sanatçı listesini döndürür."""
     async with httpx.AsyncClient() as client:
-        resp = await client.get(f"{DEEZER_BASE}/search/artist", params={"q": query})
+        resp = await client.get(f"{DEEZER_BASE}/search/artist", params={"q": query, "order": "RANKING"})
         if resp.status_code != 200:
             raise HTTPException(status_code=500, detail="Deezer API hatası")
         data = resp.json()

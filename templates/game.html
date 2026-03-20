@@ -199,25 +199,53 @@
 
         <!-- Kurulum Ekranı -->
         <section id="setup-screen" class="glass-card">
-            <div class="input-group">
-                <label for="artist-search">Sanatçı Ara</label>
-                <div class="search-box">
-                    <input type="text" id="artist-search" placeholder="Örn: The Weeknd, Tarkan..." autocomplete="off">
-                    <div id="search-results" class="results-dropdown hidden"></div>
-                </div>
+            <!-- Oyun Modu Sekmeleri -->
+            <div class="game-mode-tabs">
+                <button class="mode-tab active" data-mode="classic">Klasik</button>
+                <button class="mode-tab" data-mode="daily">Günün Ritmi</button>
             </div>
 
-            <div class="input-group">
-                <label>Zorluk Seviyesi</label>
-                <div class="difficulty-selector">
-                    <button class="diff-btn active" data-level="easy">Kolay</button>
-                    <button class="diff-btn" data-level="medium">Orta</button>
-                    <button class="diff-btn" data-level="hard">Zor</button>
+            <!-- Klasik Mod İçeriği -->
+            <div id="mode-classic-content" class="game-mode-content">
+                <div class="input-group">
+                    <label for="artist-search">Sanatçı Ara</label>
+                    <div class="search-box">
+                        <input type="text" id="artist-search" placeholder="Örn: The Weeknd, Tarkan..."
+                            autocomplete="off">
+                        <div id="search-results" class="results-dropdown hidden"></div>
+                    </div>
                 </div>
+
+                <div class="input-group">
+                    <label>Zorluk Seviyesi</label>
+                    <div class="difficulty-selector">
+                        <button class="diff-btn active" data-level="easy">Kolay</button>
+                        <button class="diff-btn" data-level="medium">Orta</button>
+                        <button class="diff-btn" data-level="hard">Zor</button>
+                    </div>
+                </div>
+
+                <button id="start-game" class="primary-btn" disabled>Oyunu Başlat</button>
+                <button id="lucky-btn" class="lucky-btn"> Şansıma Oyna</button>
             </div>
 
-            <button id="start-game" class="primary-btn" disabled>Oyunu Başlat</button>
-            <button id="lucky-btn" class="lucky-btn"> Şansıma Oyna</button>
+            <!-- Günün Ritmi İçeriği -->
+            <div id="mode-daily-content" class="game-mode-content hidden">
+                <div class="daily-description">
+                    <p>Bugünün özel seçilmiş 10 şarkıyı tahmin et!.</p>
+                </div>
+
+                <div class="input-group">
+                    <label>Zorluk Seviyesi</label>
+                    <div class="difficulty-selector">
+                        <button class="diff-btn-daily active" data-level="easy">Kolay</button>
+                        <button class="diff-btn-daily" data-level="medium">Orta</button>
+                        <button class="diff-btn-daily" data-level="hard">Zor</button>
+                    </div>
+                </div>
+
+                <button id="start-daily-btn" class="primary-btn">Günün Ritmini Başlat</button>
+            </div>
         </section>
 
         <!-- Oyun Ekranı -->
