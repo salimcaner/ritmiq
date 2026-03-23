@@ -56,6 +56,7 @@ const currentQEl = document.getElementById('current-q');
 const totalQEl = document.getElementById('total-q');
 const statusText = document.getElementById('game-status-text');
 const questionTracker = document.getElementById('question-tracker');
+const timeInfoEl = document.querySelector('.time-info');
 
 // Oyun Modu Sekmeleri
 const modeTabs = document.querySelectorAll('.mode-tab');
@@ -304,6 +305,11 @@ function setActiveDot(index) {
     if (dot) dot.classList.add('active');
 }
 
+function formatSeconds(seconds) {
+    const safe = Math.max(0, Math.floor(seconds));
+    return `0:0${safe}`;
+}
+
 // =================== LOAD QUESTION ===================
 function loadQuestion(index) {
     const q = questions[index];
@@ -330,7 +336,9 @@ function loadQuestion(index) {
     audioPlayer.currentTime = 0;
     // Süre etiketini zorluk bazlı güncelle
     const dur = isDailyMode ? getPlayDurationDaily() : getPlayDuration();
-    document.querySelector('.time-info').textContent = `0:00 / 0:0${dur}`;
+    if (timeInfoEl) {
+        timeInfoEl.textContent = `0:00 / ${formatSeconds(dur)}`;
+    }
     audioPlayer.play().catch(e => console.warn('Autoplay blocked:', e));
     startProgress();
 }
@@ -347,11 +355,18 @@ function startProgress() {
     const dur = isDailyMode ? getPlayDurationDaily() : getPlayDuration();
     progressInterval = setInterval(() => {
         if (!gameActive) { clearInterval(progressInterval); return; }
+        const elapsed = Math.min(audioPlayer.currentTime, dur);
         const pct = (audioPlayer.currentTime / dur) * 100;
         progressBar.style.width = `${Math.min(pct, 100)}%`;
+        if (timeInfoEl) {
+            timeInfoEl.textContent = `${formatSeconds(elapsed)} / ${formatSeconds(dur)}`;
+        }
         if (audioPlayer.currentTime >= dur) {
             audioPlayer.pause();
             clearInterval(progressInterval);
+            if (timeInfoEl) {
+                timeInfoEl.textContent = `${formatSeconds(dur)} / ${formatSeconds(dur)}`;
+            }
             if (gameActive) {
                 statusText.innerHTML = `Süre doldu! <button id="replay-btn" class="replay-icon-btn" title="Tekrar Dinle" style="display: inline-flex; align-items: center; justify-content: center; background: rgba(29, 185, 84, 0.2); border: none; border-radius: 50%; padding: 4px; margin-left: 6px; cursor: pointer; vertical-align: middle;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
