@@ -6,7 +6,7 @@ let currentIndex = 0;
 let results = []; // {correct: bool, trackName: string, userAnswer: string}
 let gameActive = false;
 let currentArtistNote = null;
-let isDailyMode = false;
+
 
 // Zorluk bazlı dinleme süresi (saniye)
 function getPlayDuration() {
@@ -61,9 +61,6 @@ const questionTracker = document.getElementById('question-tracker');
 const modeTabs = document.querySelectorAll('.mode-tab');
 const modeClassicContent = document.getElementById('mode-classic-content');
 const modeDailyContent = document.getElementById('mode-daily-content');
-const startDailyBtn = document.getElementById('start-daily-btn');
-const diffBtnsDaily = document.querySelectorAll('.diff-btn-daily');
-let selectedDailyDifficulty = 'easy';
 
 // =================== SEARCH ===================
 let searchTimeout;
@@ -136,73 +133,7 @@ diffBtns.forEach(btn => {
     };
 });
 
-// Günün Ritmi Zorluk
-diffBtnsDaily.forEach(btn => {
-    btn.onclick = () => {
-        diffBtnsDaily.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        selectedDailyDifficulty = btn.dataset.level;
-    };
-});
-
 // =================== START GAME ===================
-startDailyBtn.onclick = startDailyGame;
-
-async function startDailyGame() {
-    startDailyBtn.textContent = 'Yükleniyor...';
-    startDailyBtn.disabled = true;
-
-    // LOCAL STORAGE KONTROLU
-    const today = new Date();
-    const dateStr = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`;
-    const savedData = localStorage.getItem(`dailyQuizScore_${dateStr}`);
-    
-    if (savedData) {
-        // Kullanıcı bugün önceden oynamış, sonuçlara atla
-        results = JSON.parse(savedData);
-        isDailyMode = true;
-        
-        setupScreen.classList.add('hidden');
-        gameScreen.classList.add('hidden');
-        showResults();
-        
-        startDailyBtn.textContent = 'Günün Ritmini Başlat';
-        startDailyBtn.disabled = false;
-        return; // İşlemi kes! (API'yi çağırma ve oyunu başlatma)
-    }
-
-    try {
-        const res = await fetch(`${API_BASE}/daily`);
-        if (!res.ok) {
-            const err = await res.json();
-            alert(err.detail || 'Günün Ritmi başlatılamadı.');
-            startDailyBtn.textContent = 'Günün Ritmini Başlat';
-            startDailyBtn.disabled = false;
-            return;
-        }
-
-        const data = await res.json();
-        questions = data.questions;
-        currentIndex = 0;
-        results = [];
-        isDailyMode = true;
-
-        totalQEl.textContent = questions.length;
-        buildTracker(questions.length);
-
-        setupScreen.classList.add('hidden');
-        gameScreen.classList.remove('hidden');
-        resultScreen.classList.add('hidden');
-
-        loadQuestion(currentIndex);
-    } catch (err) {
-        console.error('Daily Start error:', err);
-        alert('Bağlantı hatası!');
-    } finally {
-        startDailyBtn.textContent = 'Günün Ritmini Başlat';
-        startDailyBtn.disabled = false;
-    }
-}
 
 startBtn.onclick = startGame;
 
@@ -210,7 +141,7 @@ async function startGame() {
     if (!selectedArtist) return;
     startBtn.textContent = 'Yükleniyor...';
     startBtn.disabled = true;
-    isDailyMode = false;
+
 
     // Loading Trivia Ekle
     let triviaEl = document.getElementById('loading-trivia');
@@ -222,11 +153,11 @@ async function startGame() {
     triviaEl.style.display = 'block';
 
     const loadingMessages = [
-        "Plaklar tozdan arındırılıyor...",
-        "Wegh Kennedy'i vuruyor...",
-        "Nota sehpaları düzeltiliyor...",
-        "Deezer arşivi taranıyor...",
-        "Mikrofon kabloları çözülüyor..."
+        "Taylor Swift eski sevgiliye gönderme yapacak mı düşünüyor…",
+        "Fanlar yorumlarda kavga etmeye hazırlanıyor…",
+        "Drake story atıp hype yaratıyor…",
+        "Kanye West Twitter’a yazıp silme döngüsüne giriyor…",
+        "James Hetfield ‘yeah-yeah’ provasına başladı…"
     ];
     let msgIndex = 0;
     triviaEl.textContent = loadingMessages[msgIndex];
@@ -329,14 +260,10 @@ function loadQuestion(index) {
     audioPlayer.src = q.audio_url;
     audioPlayer.currentTime = 0;
     // Süre etiketini zorluk bazlı güncelle
-    const dur = isDailyMode ? getPlayDurationDaily() : getPlayDuration();
+    const dur = getPlayDuration();
     document.querySelector('.time-info').textContent = `0:00 / 0:0${dur}`;
     audioPlayer.play().catch(e => console.warn('Autoplay blocked:', e));
     startProgress();
-}
-
-function getPlayDurationDaily() {
-    return { easy: 7, medium: 5, hard: 3 }[selectedDailyDifficulty] ?? 5;
 }
 
 // =================== AUDIO PROGRESS ===================
@@ -344,11 +271,15 @@ let progressInterval = null;
 
 function startProgress() {
     clearInterval(progressInterval);
-    const dur = isDailyMode ? getPlayDurationDaily() : getPlayDuration();
+    const dur = getPlayDuration();
     progressInterval = setInterval(() => {
         if (!gameActive) { clearInterval(progressInterval); return; }
         const pct = (audioPlayer.currentTime / dur) * 100;
         progressBar.style.width = `${Math.min(pct, 100)}%`;
+        
+        const currentSec = Math.floor(audioPlayer.currentTime);
+        document.querySelector('.time-info').textContent = `0:0${Math.min(currentSec, dur)} / 0:0${dur}`;
+        
         if (audioPlayer.currentTime >= dur) {
             audioPlayer.pause();
             clearInterval(progressInterval);
@@ -418,19 +349,7 @@ function showResults() {
     resultScreen.classList.remove('hidden');
 
     // SKOR KAYIT MANTIĞI & BUTON METNİ
-    if (isDailyMode) {
-        const today = new Date();
-        const dateStr = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`;
-        
-        // Eğer results dizisi doluysa (eski kayıt değil, gerçekten yeni oynanmışsa) kaydet
-        if (results.length > 0) {
-            localStorage.setItem(`dailyQuizScore_${dateStr}`, JSON.stringify(results));
-        }
-        
-        playAgainBtn.textContent = 'Ana Menüye Dön';
-    } else {
-        playAgainBtn.textContent = 'Tekrar Oyna';
-    }
+    playAgainBtn.textContent = 'Tekrar Oyna';
 
     const correctCount = results.filter(r => r.correct).length;
     const wrongCount = results.length - correctCount;
@@ -460,14 +379,10 @@ function showResults() {
 
     // Sanatçının notunu oku butonu
     const showNoteBtn = document.getElementById('show-note-btn');
-    
-    if (isDailyMode) {
-        showNoteBtn.style.display = 'none';
-    } else {
-        showNoteBtn.style.display = 'block'; // veya inline-block (CSS'e göre)
-        // Eğer buton disabled kaldıysa aktif hale getirelim (yeni oyun case'i için)
-        showNoteBtn.disabled = false;
-    }
+
+    showNoteBtn.style.display = 'block'; // veya inline-block (CSS'e göre)
+    // Eğer buton disabled kaldıysa aktif hale getirelim (yeni oyun case'i için)
+    showNoteBtn.disabled = false;
 
     showNoteBtn.onclick = () => {
         showNoteBtn.disabled = true;
