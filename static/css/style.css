@@ -707,13 +707,15 @@ input[type="text"]:focus {
 }
 
 .note-card {
-    background: rgba(255, 255, 255, 0.05); /* Glass effect */
+    background: rgba(255, 255, 255, 0.05);
+    /* Glass effect */
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--glass-border);
     width: 90%;
     max-width: 440px;
-    padding: 3rem 2.5rem 2.5rem; /* Increased padding */
+    padding: 3rem 2.5rem 2.5rem;
+    /* Increased padding */
     border-radius: 16px;
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
     position: relative;
@@ -770,7 +772,8 @@ input[type="text"]:focus {
     font-family: 'Caveat', cursive;
     font-size: 2rem;
     color: var(--text-main);
-    line-height: 1.6; /* Improved line spacing */
+    line-height: 1.6;
+    /* Improved line spacing */
     min-height: 80px;
     margin-bottom: 2rem;
 }
